@@ -39,6 +39,7 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 sns.set_context('paper', font_scale=1.6)
 
+
 SEED = 0
 
 def plot_confusion_matrix(y, y_pred, classnames, filename=None):
@@ -79,8 +80,8 @@ def main(args=None):
   K.set_floatx('float64')
 
   run = get_run_id(**vars(args))
-  log_dir = os.path.join(os.getcwd(), 'keras_logs', args.sim_type, run)
-  weights_path = os.path.join(log_dir, 'weights.h5')
+  log_dir = os.path.join(os.getcwd(), 'keras_logs', args.sim_type, run) #Loading the model architecture 
+  weights_path = os.path.join(log_dir, 'weights.h5') #Loading the model weights
 
   if not os.path.exists(weights_path):
     raise FileNotFoundError(weights_path)
@@ -206,6 +207,7 @@ def main(args=None):
 
   ### Loading trained autoencoder network
   encode_model = Model(inputs=model.input, outputs=model.get_layer('encoding').output)
+  #Does it only get the TimeDistributed layer or all of decoder?
   decode_model = Model(inputs=model.input, outputs=model.get_layer('time_dist').output)
 
   X_train = np.float64(X_train)
@@ -311,6 +313,12 @@ def main(args=None):
   energy_known = [e for i, e in enumerate(energy_new) if (true_flags[i] == 0)]
   energy_unknown = [e for i, e in enumerate(energy_new) if (true_flags[i] == 1)]
   print ("known/unknown", len(energy_known), len(energy_unknown))
+  
+  gmm_phi = K.eval(gmm.phi)
+  gmm_mu = K.eval(gmm.mu)
+  gmm_sigma = K.eval(gmm.sigma)
+
+  np.savez(log_dir+'/gmm_parameters.npz', gmm_phi=gmm_phi, gmm_mu=gmm_mu, gmm_sigma=gmm_sigma)
 
   percentile_list = [80.0, 95.0]
 
