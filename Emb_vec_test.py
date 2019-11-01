@@ -40,6 +40,11 @@ def main(args=None):
   print ("log_dir", log_dir)
   print("Weight matrix read...")
   
+  #Load the model
+  #How do I access dict using index? I just want to load the model  
+  #Why not use the main args?
+  model = list(survey_autoencoder(vars(args)))[2]
+  
   #LOADING GMM PARAMTERS
   # Where is gmm.mu updated?
   gmm_para = np.load(log_dir+'/gmm_parameters')
@@ -48,6 +53,21 @@ def main(args=None):
   #LOADING THE MODEL
   decode_model = Model(inputs=model.input, outputs=model.get_layer('time_dist').output)
 
+  #What is X[valid], X[new]
+  #TRAINING SAMPLES
+  gmm_mu = np.float64(gmm_mu)
+  #NO AUX INPUT FOR DECODER! DOES IT ASSUME EVEN INPUTS?
+  decoding_train = decode_model.predict(gmm_mu)
+  print(decoding_train.shape)
+  
+  phase = np.linspace(0,1,len(decoding_train[0]))
+  for i in range(len(decoding_train)):    
+    plt.plot(phase, decoding_train[i])  
+ 
+if __name__ == '__main__':
+    args = main()
+  
+  
   
   
   
